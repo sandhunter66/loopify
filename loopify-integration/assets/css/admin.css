@@ -1,0 +1,37 @@
+.loopify-settings-container {
+    max-width: 800px;
+    margin-top: 20px;
+}
+
+.loopify-info-box {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-left: 4px solid #2271b1;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+    margin: 20px 0;
+    padding: 15px;
+}
+
+.loopify-info-box h3 {
+    margin: 0 0 10px;
+    padding: 0;
+}
+
+.loopify-status-ok {
+    color: #46b450;
+    font-weight: 600;
+}
+
+.loopify-status-error {
+    color: #dc3232;
+    font-weight: 600;
+}
+
+.form-table td {
+    position: relative;
+}
+
+.form-table .description {
+    margin-top: 5px;
+    color: #666;
+}
