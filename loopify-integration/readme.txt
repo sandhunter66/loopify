@@ -1,5 +1,5 @@
-=== Loopify Integration ===
-Contributors: loopify
+=== Loopiify Integration ===
+Contributors: loopiify
 Tags: woocommerce, loyalty, rewards, crm
 Requires at least: 5.8
 Tested up to: 6.4
@@ -8,11 +8,11 @@ Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Integrate your WooCommerce store with Loopify's loyalty and rewards system.
+Integrate your WooCommerce store with Loopiify's loyalty and rewards system.
 
 == Description ==
 
-Loopify Integration connects your WooCommerce store to Loopify's powerful loyalty and rewards platform. Automatically sync customer data, orders, and manage your loyalty programs directly from your WordPress dashboard.
+Loopiify Integration connects your WooCommerce store to Loopiify's powerful loyalty and rewards platform. Automatically sync customer data, orders, and manage your loyalty programs directly from your WordPress dashboard.
 
 Features:
 
@@ -32,9 +32,9 @@ Features:
 
 == Frequently Asked Questions ==
 
-= Do I need a Loopify account? =
+= Do I need a Loopiify account? =
 
-Yes, you need an active Loopify account to use this plugin. Visit loopify.com to sign up.
+Yes, you need an active Loopiify account to use this plugin. Visit loopiify.netlify.app to sign up.
 
 = How often does it sync data? =
 
@@ -48,4 +48,4 @@ You can choose between hourly, twice daily, or daily sync intervals in the setti
 == Upgrade Notice ==
 
 = 1.0.0 =
-Initial release of the Loopify Integration plugin.
+* Initial release of the Loopiify Integration plugin.

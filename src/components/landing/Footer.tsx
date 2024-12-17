@@ -11,7 +11,7 @@ export function Footer() {
               <div className="bg-blue-600 p-2 rounded-lg">
                 <BarChart2 className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xl font-bold text-white">Loopify</span>
+              <span className="text-xl font-bold text-white">Loopiify</span>
             </div>
             <p className="text-sm text-gray-400">
               Digital customer loyalty platform for businesses in Malaysia.
@@ -54,7 +54,7 @@ export function Footer() {
         <div className="border-t border-gray-800 pt-8 text-sm text-gray-400">
           <div className="flex flex-col sm:flex-row justify-between gap-4">
             <div>
-              © 2024 Loopify. All rights reserved.
+              © 2024 Loopiify. All rights reserved.
             </div>
             <div className="flex gap-6">
               <a href="#" className="hover:text-white">Terms of Service</a>

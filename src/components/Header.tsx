@@ -13,7 +13,7 @@ export function Header() {
               </div>
             </div>
             <div className="ml-4">
-              <h1 className="text-xl font-bold text-gray-900">Loopify</h1>
+              <h1 className="text-xl font-bold text-gray-900">Loopiify</h1>
               <p className="text-sm text-gray-500">Your E-Commerce Loyalty System</p>
             </div>
           </div>

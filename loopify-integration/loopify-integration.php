@@ -1,13 +1,13 @@
 <?php
 /**
- * Plugin Name: Loopify Integration
- * Plugin URI: https://melodious-sfogliatella-59a731.netlify.app/
- * Description: Integrates your WooCommerce store with Loopify loyalty system
+ * Plugin Name: Loopiify Integration
+ * Plugin URI: https://loopiify.netlify.app
+ * Description: Integrates your WooCommerce store with Loopiify loyalty system
  * Version: 1.0.0
- * Author: Loopify
- * Author URI: https://melodious-sfogliatella-59a731.netlify.app/
+ * Author: Loopiify
+ * Author URI: https://loopiify.netlify.app
  * License: GPL v2 or later
- * Text Domain: loopify-integration
+ * Text Domain: loopiify-integration
  * Requires at least: 5.8
  * Requires PHP: 7.4
  * WC requires at least: 5.0
@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Loopify_Integration {
+class Loopiify_Integration {
     private static $instance = null;
     const VERSION = '1.0.0';
 
@@ -48,7 +48,7 @@ class Loopify_Integration {
             add_action('admin_notices', function() {
                 ?>
                 <div class="notice notice-error">
-                    <p><?php _e('Loopify Integration requires WooCommerce to be installed and activated.', 'loopify-integration'); ?></p>
+                    <p><?php _e('Loopiify Integration requires WooCommerce to be installed and activated.', 'loopiify-integration'); ?></p>
                 </div>
                 <?php
             });
@@ -59,19 +59,19 @@ class Loopify_Integration {
 
     public function activate() {
         // Create necessary database tables or options
-        add_option('loopify_api_url', '');
-        add_option('loopify_api_key', '');
-        add_option('loopify_sync_interval', 'hourly');
+        add_option('loopiify_api_url', '');
+        add_option('loopiify_api_key', '');
+        add_option('loopiify_sync_interval', 'hourly');
     }
 
     public function deactivate() {
         // Cleanup if needed
-        wp_clear_scheduled_hook('loopify_sync_customers');
+        wp_clear_scheduled_hook('loopiify_sync_customers');
     }
 
     public function init() {
         // Load translations
-        load_plugin_textdomain('loopify-integration', false, dirname(plugin_basename(__FILE__)) . '/languages');
+        load_plugin_textdomain('loopiify-integration', false, dirname(plugin_basename(__FILE__)) . '/languages');
 
         // Hook into WooCommerce
         add_action('woocommerce_order_status_changed', array($this, 'handle_order_status_change'), 10, 4);
@@ -87,10 +87,10 @@ class Loopify_Integration {
         }
 
         // Schedule sync
-        if (!wp_next_scheduled('loopify_sync_customers')) {
-            wp_schedule_event(time(), get_option('loopify_sync_interval', 'hourly'), 'loopify_sync_customers');
+        if (!wp_next_scheduled('loopiify_sync_customers')) {
+            wp_schedule_event(time(), get_option('loopiify_sync_interval', 'hourly'), 'loopiify_sync_customers');
         }
-        add_action('loopify_sync_customers', array($this, 'sync_customers'));
+        add_action('loopiify_sync_customers', array($this, 'sync_customers'));
     }
 
     public function handle_order_status_change($order_id, $old_status, $new_status, $order) {
@@ -98,8 +98,8 @@ class Loopify_Integration {
             return;
         }
 
-        $api_url = get_option('loopify_api_url');
-        $api_key = get_option('loopify_api_key');
+        $api_url = get_option('loopiify_api_url');
+        $api_key = get_option('loopiify_api_key');
 
         if (empty($api_url) || empty($api_key)) {
             return;
@@ -172,19 +172,20 @@ class Loopify_Integration {
 
     public function add_admin_menu() {
         add_menu_page(
-            __('Loopify Settings', 'loopify-integration'),
-            __('Loopify', 'loopify-integration'),
+            __('Loopiify Settings', 'loopiify-integration'),
+            __('Loopiify', 'loopiify-integration'),
             'manage_options',
-            'loopify-settings',
+            'loopiify-settings',
             array($this, 'settings_page'),
             'dashicons-awards'
         );
     }
 
     public function register_settings() {
-        register_setting('loopify_settings', 'loopify_api_url');
-        register_setting('loopify_settings', 'loopify_api_key');
-        register_setting('loopify_settings', 'loopify_sync_interval');
+        register_setting('loopiify_settings', 'loopiify_api_url');
+        register_setting('loopiify_settings', 'loopiify_api_key');
+        register_setting('loopiify_settings', 'loopiify_woo_consumer_key');
+        register_setting('loopiify_settings', 'loopiify_woo_consumer_secret');
     }
 
     public function settings_page() {
@@ -192,19 +193,19 @@ class Loopify_Integration {
     }
 
     public function enqueue_admin_scripts($hook) {
-        if ('toplevel_page_loopify-settings' !== $hook) {
+        if ('toplevel_page_loopiify-settings' !== $hook) {
             return;
         }
 
         wp_enqueue_style(
-            'loopify-admin',
+            'loopiify-admin',
             plugins_url('assets/css/admin.css', __FILE__),
             array(),
             self::VERSION
         );
 
         wp_enqueue_script(
-            'loopify-admin',
+            'loopiify-admin',
             plugins_url('assets/js/admin.js', __FILE__),
             array('jquery'),
             self::VERSION,
@@ -213,11 +214,11 @@ class Loopify_Integration {
     }
 
     public function add_settings_link($links) {
-        $settings_link = '<a href="admin.php?page=loopify-settings">' . __('Settings', 'loopify-integration') . '</a>';
+        $settings_link = '<a href="admin.php?page=loopiify-settings">' . __('Settings', 'loopiify-integration') . '</a>';
         array_unshift($links, $settings_link);
         return $links;
     }
 }
 
 // Initialize the plugin
-add_action('plugins_loaded', array('Loopify_Integration', 'get_instance'));
+add_action('plugins_loaded', array('Loopiify_Integration', 'get_instance'));
