@@ -1,8 +1,8 @@
 import React from 'react';
-import { BarChart2, MessageCircle, Gift, Stamp, Coins, Store, Check, ArrowRight, Mail, Lock, Menu, X } from 'lucide-react';
+import { Mail, Lock, Menu, X } from 'lucide-react';
 import { useAuth } from './hooks/useAuth';
 import { Toaster } from 'react-hot-toast';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Navigation } from './components/landing/Navigation';
 import { Hero } from './components/landing/Hero';
 import { Problems } from './components/landing/Problems';
@@ -89,10 +89,9 @@ export default function App() {
   }
 
   return (
-    <BrowserRouter>
+    <Router>
       <Routes>
-        <Route path="/customer" element={<CustomerView />} />
-        <Route path="*" element={
+        <Route path="/" element={
           <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
             <Toaster position="top-right" />
 
@@ -191,8 +190,10 @@ export default function App() {
             <Footer />
           </div>
         } />
+        <Route path="/customer" element={<CustomerView />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Toaster position="top-right" />
-    </BrowserRouter>
+    </Router>
   );
 }
