@@ -2,6 +2,7 @@ import React from 'react';
 import { BarChart2, MessageCircle, Gift, Stamp, Coins, Store, Check, ArrowRight, Mail, Lock, Menu, X } from 'lucide-react';
 import { useAuth } from './hooks/useAuth';
 import { Toaster } from 'react-hot-toast';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Navigation } from './components/landing/Navigation';
 import { Hero } from './components/landing/Hero';
 import { Problems } from './components/landing/Problems';
@@ -88,11 +89,15 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      <Toaster position="top-right" />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/customer" element={<CustomerView />} />
+        <Route path="*" element={
+          <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+            <Toaster position="top-right" />
 
-      {/* Login Modal */}
-      {showLogin && (
+            {/* Login Modal */}
+            {showLogin && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
             <div className="p-8">
@@ -175,15 +180,19 @@ export default function App() {
           </div>
         </div>
       )}
-      <Navigation onShowLogin={() => setShowLogin(true)} />
-      <Hero />
-      <Problems />
-      <Solution />
-      <Features />
-      <Testimonials />
-      <Pricing />
-      <CTA />
-      <Footer />
-    </div>
+            <Navigation onShowLogin={() => setShowLogin(true)} />
+            <Hero />
+            <Problems />
+            <Solution />
+            <Features />
+            <Testimonials />
+            <Pricing />
+            <CTA />
+            <Footer />
+          </div>
+        } />
+      </Routes>
+      <Toaster position="top-right" />
+    </BrowserRouter>
   );
 }

@@ -35,7 +35,7 @@ export async function sendStampNotification(
     }
 
     // Generate loyalty card URL
-    const baseUrl = store.url || 'https://melodious-sfogliatella-59a731.netlify.app/'; // Replace with your actual domain
+    const baseUrl = store.url || 'https://loopiify.netlify.app';
     const loyaltyUrl = `${baseUrl}/customer`;
 
     // Create message
