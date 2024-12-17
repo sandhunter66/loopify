@@ -51,3 +51,63 @@ export async function sendStampNotification(
     // Don't throw - treat notifications as non-critical
   }
 }
+
+export async function processImmediateMessages() {
+  try {
+    // Get all pending immediate messages
+    const { data: jobs, error: fetchError } = await supabase
+      .from('whatsapp_followup_jobs')
+      .select(`
+        *,
+        store:stores(api_key),
+        customer:customers(phone)
+      `)
+      .eq('status', 'pending')
+      .lte('scheduled_for', new Date().toISOString());
+
+    if (fetchError) throw fetchError;
+
+    // Process each job
+    for (const job of jobs || []) {
+      try {
+        if (!job.store?.api_key) {
+          throw new Error('Store API key not configured');
+        }
+
+        if (!job.customer?.phone) {
+          throw new Error('Customer phone number not found');
+        }
+
+        // Send WhatsApp message
+        await sendTextMessage(
+          job.store.api_key,
+          job.customer.phone,
+          job.message
+        );
+
+        // Update job status to sent
+        const { error: updateError } = await supabase
+          .from('whatsapp_followup_jobs')
+          .update({ 
+            status: 'sent',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', job.id);
+
+        if (updateError) throw updateError;
+      } catch (error) {
+        // Mark job as failed
+        await supabase
+          .from('whatsapp_followup_jobs')
+          .update({ 
+            status: 'failed',
+            error_message: error instanceof Error ? error.message : 'Unknown error',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', job.id);
+      }
+    }
+  } catch (error) {
+    console.error('Error processing immediate messages:', error);
+  }
+}
