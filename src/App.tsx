@@ -30,6 +30,16 @@ export default function App() {
   });
 
   React.useEffect(() => {
+    // Start WhatsApp processor when user logs in
+    if (user) {
+      startWhatsAppProcessor();
+      return () => {
+        stopWhatsAppProcessor();
+      };
+    }
+  }, []);
+
+  React.useEffect(() => {
     // Reset to dashboard view whenever user logs in
     if (user) {
       setActiveView('home');
