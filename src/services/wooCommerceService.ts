@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase';
 import type { WooCommerceCustomer } from '../types/woocommerce';
 import type { Customer } from '../types/customer';
+import { NetworkError } from '../lib/utils/errors';
 
 interface WooCommerceConfig {
   url: string;
@@ -8,31 +9,51 @@ interface WooCommerceConfig {
   consumerSecret: string;
 }
 
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 second
+
+async function fetchWithRetry(url: string, options: RequestInit, retries = MAX_RETRIES): Promise<Response> {
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      throw new NetworkError(`HTTP error! status: ${response.status}`);
+    }
+    return response;
+  } catch (error) {
+    if (retries > 0) {
+      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+      return fetchWithRetry(url, options, retries - 1);
+    }
+    throw new NetworkError('Failed to connect to WooCommerce API after multiple attempts');
+  }
+}
+
 export async function fetchWooCommerceCustomers(config: WooCommerceConfig): Promise<WooCommerceCustomer[]> {
   try {
+    // Validate config
+    if (!config.url || !config.consumerKey || !config.consumerSecret) {
+      throw new Error('Invalid WooCommerce configuration');
+    }
+
+    // Normalize URL
+    const baseUrl = config.url.replace(/\/$/, '');
+    const apiUrl = `${baseUrl}/wp-json/wc/v3`;
+
     // Fetch all orders first to get customer purchase data
-    const ordersResponse = await fetch(`${config.url}/wp-json/wc/v3/orders?per_page=100&status=completed`, {
+    const ordersResponse = await fetchWithRetry(`${apiUrl}/orders?per_page=100&status=completed`, {
       headers: {
         'Authorization': 'Basic ' + btoa(`${config.consumerKey}:${config.consumerSecret}`)
       }
     });
-
-    if (!ordersResponse.ok) {
-      throw new Error(`HTTP error fetching orders! status: ${ordersResponse.status}`);
-    }
 
     const orders = await ordersResponse.json();
 
     // Get customer data
-    const customersResponse = await fetch(`${config.url}/wp-json/wc/v3/customers?per_page=100`, {
+    const customersResponse = await fetchWithRetry(`${apiUrl}/customers?per_page=100`, {
       headers: {
         'Authorization': 'Basic ' + btoa(`${config.consumerKey}:${config.consumerSecret}`)
       }
     });
-
-    if (!customersResponse.ok) {
-      throw new Error(`HTTP error fetching customers! status: ${customersResponse.status}`);
-    }
 
     const customers = await customersResponse.json();
 
@@ -53,8 +74,10 @@ export async function fetchWooCommerceCustomers(config: WooCommerceConfig): Prom
       };
     });
   } catch (error) {
-    console.error('Error fetching WooCommerce customers:', error);
-    throw error;
+    if (error instanceof NetworkError) {
+      throw error;
+    }
+    throw new NetworkError('Failed to sync with WooCommerce. Please check your connection and credentials.');
   }
 }
 
