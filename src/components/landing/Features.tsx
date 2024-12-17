@@ -25,7 +25,7 @@ export function Features() {
       icon: MessageCircle,
       title: 'WhatsApp Blaster',
       description: 'Hantar Whatsapp Promotion dan engagement ke semua database customer anda.',
-      image: 'https://images.unsplash.com/photo-1611746872915-64382b5c76da?auto=format&fit=crop&q=80'
+      image: 'https://da7e222249b86929a6e8d7df12b6e53c.cdn.bubble.io/f1734407419891x182794946798255900/Untitled%20design%20%282%29.gif?_gl=1*la9481*_gcl_au*MjA4MjkyMDkxMC4xNzM0MzE5MjM1*_ga*MTI1NDY4NTQ0MS4xNzAzMDgwNTEw*_ga_BFPVR2DEE2*MTczNDQwNzA4Mi4yNDIuMS4xNzM0NDA3Mzc3LjU5LjAuMA..?auto=format&fit=crop&q=80'
     },
     {
       icon: ArrowRightCircle,
