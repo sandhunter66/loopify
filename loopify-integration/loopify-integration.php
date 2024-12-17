@@ -72,11 +72,12 @@ class Loopiify_Integration {
     public function init() {
         // Load translations
         load_plugin_textdomain('loopiify-integration', false, dirname(plugin_basename(__FILE__)) . '/languages');
-
+        
         // Hook into WooCommerce
         add_action('woocommerce_order_status_changed', array($this, 'handle_order_status_change'), 10, 4);
-        add_action('woocommerce_new_customer', array($this, 'handle_new_customer'), 10, 1);
-        add_action('woocommerce_update_customer', array($this, 'handle_customer_update'), 10, 1);
+        add_action('woocommerce_checkout_order_processed', array($this, 'handle_new_order'), 10, 3);
+        add_action('woocommerce_new_order', array($this, 'handle_new_order_admin'), 10, 1);
+        add_action('woocommerce_order_refunded', array($this, 'handle_order_refund'), 10, 2);
 
         // Admin hooks
         if (is_admin()) {
@@ -93,11 +94,23 @@ class Loopiify_Integration {
         add_action('loopiify_sync_customers', array($this, 'sync_customers'));
     }
 
-    public function handle_order_status_change($order_id, $old_status, $new_status, $order) {
-        if ($new_status !== 'completed') {
-            return;
-        }
+    public function handle_new_order($order_id, $posted_data, $order) {
+        $this->sync_order_to_loopiify($order_id, 'pending');
+    }
 
+    public function handle_new_order_admin($order_id) {
+        $this->sync_order_to_loopiify($order_id, 'pending');
+    }
+
+    public function handle_order_refund($order_id, $refund_id) {
+        $this->sync_order_to_loopiify($order_id, 'refunded');
+    }
+
+    public function handle_order_status_change($order_id, $old_status, $new_status, $order) {
+        $this->sync_order_to_loopiify($order_id, $new_status);
+    }
+
+    private function sync_order_to_loopiify($order_id, $status) {
         $api_url = get_option('loopiify_api_url');
         $api_key = get_option('loopiify_api_key');
 
@@ -110,38 +123,61 @@ class Loopiify_Integration {
             return;
         }
 
-        $customer = new WC_Customer($customer_id);
         $data = $this->prepare_order_data($order, $customer);
+        $data['order']['status'] = $status;
 
-        wp_remote_post($api_url . '/api/webhook/order', array(
+        $response = wp_remote_post($api_url . '/api/webhook/order', array(
             'headers' => array(
                 'Content-Type' => 'application/json',
                 'X-API-Key' => $api_key
             ),
             'body' => json_encode($data),
-            'timeout' => 30
+            'timeout' => 30,
+            'sslverify' => false // Only if needed for local development
         ));
+
+        if (is_wp_error($response)) {
+            error_log('Loopiify sync error: ' . $response->get_error_message());
+        }
+    }
+
+    private function create_customer_from_order($order) {
+        return (object) array(
+            'get_first_name' => function() use ($order) { return $order->get_billing_first_name(); },
+            'get_last_name' => function() use ($order) { return $order->get_billing_last_name(); },
+            'get_email' => function() use ($order) { return $order->get_billing_email(); },
+            'get_billing_phone' => function() use ($order) { return $order->get_billing_phone(); },
+            'get_billing_address_1' => function() use ($order) { return $order->get_billing_address_1(); },
+            'get_billing_address_2' => function() use ($order) { return $order->get_billing_address_2(); },
+            'get_billing_city' => function() use ($order) { return $order->get_billing_city(); },
+            'get_billing_state' => function() use ($order) { return $order->get_billing_state(); },
+            'get_billing_postcode' => function() use ($order) { return $order->get_billing_postcode(); },
+            'get_billing_country' => function() use ($order) { return $order->get_billing_country(); }
     }
 
     private function prepare_order_data($order, $customer) {
         return array(
             'order_id' => $order->get_id(),
+            'order_number' => $order->get_order_number(),
             'customer' => array(
-                'first_name' => $customer->get_first_name(),
-                'last_name' => $customer->get_last_name(),
-                'email' => $customer->get_email(),
-                'phone' => $this->format_phone_number($customer->get_billing_phone()),
-                'address_line1' => $customer->get_billing_address_1(),
-                'address_line2' => $customer->get_billing_address_2(),
-                'city' => $customer->get_billing_city(),
-                'state' => $customer->get_billing_state(),
-                'postcode' => $customer->get_billing_postcode(),
-                'country' => $customer->get_billing_country()
+                'first_name' => call_user_func([$customer, 'get_first_name']),
+                'last_name' => call_user_func([$customer, 'get_last_name']),
+                'email' => call_user_func([$customer, 'get_email']),
+                'phone' => $this->format_phone_number(call_user_func([$customer, 'get_billing_phone'])),
+                'address_line1' => call_user_func([$customer, 'get_billing_address_1']),
+                'address_line2' => call_user_func([$customer, 'get_billing_address_2']),
+                'city' => call_user_func([$customer, 'get_billing_city']),
+                'state' => call_user_func([$customer, 'get_billing_state']),
+                'postcode' => call_user_func([$customer, 'get_billing_postcode']),
+                'country' => call_user_func([$customer, 'get_billing_country'])
             ),
             'order' => array(
                 'total' => $order->get_total(),
                 'currency' => $order->get_currency(),
-                'items' => $this->get_order_items($order)
+                'items' => $this->get_order_items($order),
+                'payment_method' => $order->get_payment_method(),
+                'payment_method_title' => $order->get_payment_method_title(),
+                'created_at' => $order->get_date_created()->format('c')
             )
         );
     }
