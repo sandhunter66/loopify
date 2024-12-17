@@ -62,7 +62,7 @@ export function PhoneSignIn({ onSignIn }: PhoneSignInProps) {
   return (
     <div className="bg-white rounded-lg shadow-sm p-6">
       <h2 className="text-lg font-medium text-gray-900 mb-4">
-        View Your Loyalty Card
+        Sign in with Phone Number
       </h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -74,6 +74,7 @@ export function PhoneSignIn({ onSignIn }: PhoneSignInProps) {
             <Phone className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
             <input
               type="tel"
+              autoFocus
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="e.g., 60123456789"
