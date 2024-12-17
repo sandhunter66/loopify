@@ -80,7 +80,7 @@ export function Tools({ onNavigate }: ToolsProps) {
             title="WhatsApp Auto-Followup"
             description="Automate follow-up messages to customers"
             icon={ArrowRightCircle}
-            onClick={() => handleToolClick('whatsapp-followup')}
+            onClick={() => handleToolClick('whatsapp-followup')} 
           />
         </ToolCategory>
       </div>
